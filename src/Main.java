@@ -1,19 +1,26 @@
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
 	public static void main(String[] args) throws Exception{
-		LinkedList<Vulnerability> vulnerabilities = SheetLoader.loadData(new File("data.csv"));
-		Vulnerability vulnerability = Vulnerability.fromRow(new String[]{
-				"Apple",
-				"",
-				"1",
-				"93.0",
-				"Team A"
-		});
-		List<Vulnerability> matches = findBestMatch(vulnerabilities, vulnerability);
-		System.out.println(matches.size());
-		matches.forEach(System.out::println);
+
+		File inputFile = new File(Arrays.stream(args).collect(Collectors.joining(" ")));
+		LinkedList<Vulnerability> teamData = SheetLoader.loadData(new File("data.csv"));
+		LinkedList<Vulnerability> inputData = SheetLoader.loadData(inputFile);
+
+		for(Vulnerability input : inputData) {
+			System.out.println("Scanning for matches to " + input.toString());
+			List<Vulnerability> matches = findBestMatch(teamData, input);
+			System.out.println("Found " + matches.size() + " match(es)");
+			if(matches.size() == 1){
+				System.out.println("SEND TO " + matches.get(0).getTeam());
+			}
+			else{
+				System.out.println("MULTIPLE MATCHES FOUND, COULD BE: " + matches.stream().map(Vulnerability::getTeam).collect(Collectors.joining(", ")));
+			}
+			System.out.println();
+		}
 	}
 
 	/**
